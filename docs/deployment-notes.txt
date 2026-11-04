@@ -1,0 +1,9 @@
+Employee Management Portal
+
+Deployment Pipeline:
+1. Validate application
+2. Run automated tests
+3. Build application
+4. Upload build artifact
+5. Deploy to staging
+6. Deploy to production

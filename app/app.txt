@@ -1,0 +1,4 @@
+Application Name: Employee Management Portal
+Application Status: Running
+Application Version: 1.0.0
+Environment: Development
