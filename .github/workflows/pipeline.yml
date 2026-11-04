@@ -1,0 +1,104 @@
+name: Day 16 Advanced CI CD Pipeline
+
+'on':
+  push:
+    branches:
+      - main
+      - "feature/**"
+
+  pull_request:
+    branches:
+      - main
+
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    name: Validate Application
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v5
+
+      - name: Check application file
+        run: test -f app/app.txt
+
+      - name: Validate application status
+        run: grep -q "Application Status: Running" app/app.txt
+
+      - name: Validation successful
+        run: echo "Application validation successful"
+
+  test:
+    name: Run Application Tests
+    runs-on: ubuntu-latest
+    needs: validate
+
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v5
+
+      - name: Run automated tests
+        run: bash tests/test-app.sh
+
+  build:
+    name: Build Application
+    runs-on: ubuntu-latest
+    needs: test
+
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v5
+
+      - name: Create build package
+        run: |
+          mkdir -p build
+          cp -r app docs build/
+          cd build
+          zip -r employee-portal.zip app docs
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: employee-portal-build
+          path: build/employee-portal.zip
+          retention-days: 7
+
+  staging:
+    name: Deploy to Staging
+    runs-on: ubuntu-latest
+    needs: build
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+
+    environment: staging
+
+    steps:
+      - name: Download build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: employee-portal-build
+          path: deployment-package
+
+      - name: Simulate staging deployment
+        run: |
+          echo "Deploying application to staging..."
+          ls -l deployment-package
+          echo "Staging deployment successful"
+
+  production:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+    needs: staging
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+
+    environment: production
+
+    steps:
+      - name: Simulate production deployment
+        run: |
+          echo "Deploying application to production..."
+          echo "Production deployment successful"
