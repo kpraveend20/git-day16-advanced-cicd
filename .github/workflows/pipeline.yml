@@ -1,6 +1,7 @@
+
 name: Day 16 Advanced CI CD Pipeline
 
-'on':
+on:
   push:
     branches:
       - main
@@ -19,7 +20,6 @@ jobs:
   validate:
     name: Validate Application
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout source code
         uses: actions/checkout@v5
@@ -28,7 +28,7 @@ jobs:
         run: test -f app/app.txt
 
       - name: Validate application status
-        run: grep -q "Application Status: Running" app/app.txt
+        run: 'grep -q "Application Status: Running" app/app.txt'
 
       - name: Validation successful
         run: echo "Application validation successful"
@@ -37,7 +37,6 @@ jobs:
     name: Run Application Tests
     runs-on: ubuntu-latest
     needs: validate
-
     steps:
       - name: Checkout source code
         uses: actions/checkout@v5
@@ -49,7 +48,6 @@ jobs:
     name: Build Application
     runs-on: ubuntu-latest
     needs: test
-
     steps:
       - name: Checkout source code
         uses: actions/checkout@v5
@@ -73,9 +71,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: build
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-
     environment: staging
-
     steps:
       - name: Download build artifact
         uses: actions/download-artifact@v4
@@ -94,9 +90,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: staging
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-
     environment: production
-
     steps:
       - name: Simulate production deployment
         run: |
